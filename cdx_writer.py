@@ -564,9 +564,14 @@ class RevisitHandler(HttpHandler):
     @property
     def new_style_checksum(self):
         digest = self.get_record_header('WARC-Payload-Digest')
-        if digest is None:
-            return None
-        return digest.replace('sha1:', '')
+        if digest:
+            return digest.replace('sha1:', '')
+        # For "revisit" record with FTP URL, the WARC-Block-Digest
+        # is valid as digest, see FtpHandler.
+        if self.record.url.startswith('ftp://'):
+            digest = self.get_record_header('WARC-Block-Digest')
+            if digest:
+                return digest.replace('sha1:', '')
 
 class ScreenshotHandler(RecordHandler):
     @property
