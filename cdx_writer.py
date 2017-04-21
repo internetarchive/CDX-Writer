@@ -613,6 +613,7 @@ class FtpHandler(RecordHandler):
         h = hashlib.sha1(self.record.content[1])
         return base64.b32encode(h.digest())
 
+
 class RecordDispatcher(object):
     def __init__(self, all_records=False, screenshot_mode=False):
         self.dispatchers = []
@@ -639,6 +640,13 @@ class RecordDispatcher(object):
             # exclude 304 Not Modified responses (unless --all-records)
             m = ResponseHandler.RE_RESPONSE_LINE.match(record.content[1])
             if m and m.group(1) == '304':
+                return None
+            # Deleted captures have content like this:
+            # `DELETED_TIME=20000322235722_DELETER=Kurt_REASON=alexa_list`
+            # If content after the HTTP headers starts with that, it should
+            # be excluded
+            if record.content and record.content[1] and \
+                    '\r\n\r\nDELETED_TIME=' in record.content[1]:
                 return None
             return ResponseHandler
         elif record.type == 'revisit':
