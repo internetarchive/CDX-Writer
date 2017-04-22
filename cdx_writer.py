@@ -23,6 +23,7 @@ import hashlib
 import json
 import urlparse
 from datetime import datetime
+from dateutil import parser
 from operator import attrgetter
 from optparse import OptionParser
 
@@ -107,6 +108,37 @@ def urljoin_and_normalize(base, url, charset):
     #encode spaces
     return norm_url.replace(' ', '%20')
 
+
+CURRENT_YEAR = datetime.utcnow().year
+
+def timestamp_is_valid(ts):
+    """Input is IA timestamp formatted like this: YYYYMMDDHHMMSS
+    Return False if day, mon or year outside range or invalid. Else True.
+    """
+    if ts and ts.isdigit():
+        if len(ts) != 14:
+            return False
+        year = int(ts[0:4])
+        if year < 1991 or year > CURRENT_YEAR:
+            return False
+        month = int(ts[4:6])
+        if month < 1 or month > 12:
+            return False
+        day = int(ts[6:8])
+        if day < 1 or day > 31:
+            return False
+        return True
+    return False
+
+def http_date_timestamp(http_date):
+    """Input is HTTP Date formatted like this: Fri, 16 Aug 2013 10:51:08 GMT
+    but format may vary. Output is IA timestamp formatted like: YYYYMMDDHHMMSS
+    """
+    try:
+        dt = parser.parse(http_date)
+        return dt.strftime("%Y%m%d%H%M%S")
+    except:
+        return None
 
 class ParseError(Exception):
     pass
@@ -351,6 +383,22 @@ class ResponseHandler(HttpHandler):
         self.lxml_parse_limit = cdx_writer.lxml_parse_limit
         self.headers, self.content = self.parse_headers_and_content()
         self.meta_tags = self.parse_meta_tags()
+
+    @property
+    def date(self):
+        """date / field "b".
+        If WARC timestamp is invalid, extract datetime from Date HTTP header
+        and try to convert it to timestamp.
+        """
+        ts = super(ResponseHandler, self).date
+        if timestamp_is_valid(ts):
+            return ts
+        http_date = self.parse_http_header('date')
+        if http_date:
+            ts = http_date_timestamp(http_date)
+            if ts:
+                return ts
+        return None
 
     response_pattern = re.compile('application/http;\s*msgtype=response$', re.I)
 
