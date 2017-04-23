@@ -3,19 +3,23 @@
 import pytest
 import py
 import sys
-from cdx_writer import (timestamp_is_valid, http_date_timestamp, InvalidTsYear,
-                        InvalidTsMonth, InvalidTsDay)
+
+
+testdir = py.path.local(__file__).dirpath()
+datadir = testdir / "small_warcs"
+sys.path[0:0] = (str(testdir / '..'),)
+cdx_writer = __import__('cdx_writer')
 
 
 @pytest.mark.parametrize("ts,exc", [
-    ("20121506143600", InvalidTsMonth),
-    ("20010161126200", InvalidTsDay),
-    ("00001012262000", InvalidTsYear),
-    ("30001012262000", InvalidTsYear),
+    ("20121506143600", cdx_writer.InvalidTsMonth),
+    ("20010161126200", cdx_writer.InvalidTsDay),
+    ("00001012262000", cdx_writer.InvalidTsYear),
+    ("30001012262000", cdx_writer.InvalidTsYear),
     ])
 def test_timestamp_is_valid_exception(ts, exc):
     with pytest.raises(exc):
-        timestamp_is_valid(ts)
+        cdx_writer.timestamp_is_valid(ts)
 
 
 @pytest.mark.parametrize("ts", [
@@ -23,7 +27,7 @@ def test_timestamp_is_valid_exception(ts, exc):
     "20121206143600"
     ])
 def test_timestamp_is_valid(ts):
-    assert timestamp_is_valid(ts) is True
+    assert cdx_writer.timestamp_is_valid(ts) is True
 
 
 @pytest.mark.parametrize("http_date,ts", [
@@ -34,13 +38,8 @@ def test_timestamp_is_valid(ts):
     (None, None)
     ])
 def test_http_date_timestamp(http_date, ts):
-    assert http_date_timestamp(http_date) == ts
+    assert cdx_writer.http_date_timestamp(http_date) == ts
 
-
-testdir = py.path.local(__file__).dirpath()
-datadir = testdir / "small_warcs"
-sys.path[0:0] = (str(testdir / '..'),)
-cdx_writer = __import__('cdx_writer')
 
 def test_invalid_warc_date(tmpdir):
     """invalid_range_digit_date.arc.gz has invalid WARC timestamp 20001812054100
