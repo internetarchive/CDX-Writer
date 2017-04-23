@@ -37,16 +37,16 @@ def test_http_date_timestamp(http_date, ts):
     assert http_date_timestamp(http_date) == ts
 
 
+testdir = py.path.local(__file__).dirpath()
+datadir = testdir / "small_warcs"
+sys.path[0:0] = (str(testdir / '..'),)
+cdx_writer = __import__('cdx_writer')
+
 def test_invalid_warc_date(tmpdir):
     """invalid_range_digit_date.arc.gz has invalid WARC timestamp 20001812054100
     and HTTP Date: Wed, 23 Aug 2000 05:42:20 GMT. Output timestamp should be:
     20000812054100 (month replaced by HTTP Date month).
     """
-    testdir = py.path.local(__file__).dirpath()
-    datadir = testdir / "small_warcs"
-    sys.path[0:0] = (str(testdir / '..'),)
-    cdx_writer = __import__('cdx_writer')
-
     args = ["--all-records", "invalid_range_digit_date.arc.gz"]
     with datadir.as_cwd():
         outpath = tmpdir / 'stdout'
