@@ -111,6 +111,15 @@ def urljoin_and_normalize(base, url, charset):
 
 CURRENT_YEAR = datetime.utcnow().year
 
+class InvalidTsYear(Exception):
+    pass
+
+class InvalidTsMonth(Exception):
+    pass
+
+class InvalidTsDay(Exception):
+    pass
+
 def timestamp_is_valid(ts):
     """Input is IA timestamp formatted like this: YYYYMMDDHHMMSS
     Return False if day, mon or year outside range or invalid. Else True.
@@ -120,13 +129,13 @@ def timestamp_is_valid(ts):
             return False
         year = int(ts[0:4])
         if year < 1991 or year > CURRENT_YEAR:
-            return False
+            raise InvalidTsYear
         month = int(ts[4:6])
         if month < 1 or month > 12:
-            return False
+            raise InvalidTsMonth
         day = int(ts[6:8])
         if day < 1 or day > 31:
-            return False
+            raise InvalidTsDay
         return True
     return False
 
@@ -387,17 +396,30 @@ class ResponseHandler(HttpHandler):
     @property
     def date(self):
         """date / field "b".
-        If WARC timestamp is invalid, extract datetime from Date HTTP header
-        and try to convert it to timestamp.
+        If WARC timestamp is invalid regarding year, month or day, the relevant
+        exception is raised by `timestamp_is_valid`. Try to extract datetime
+        from Date HTTP header and modify WARC timestamp accordingly.
+        If the WARC timestamp problem is different, just return None.
         """
         ts = super(ResponseHandler, self).date
-        if timestamp_is_valid(ts):
-            return ts
-        http_date = self.parse_http_header('date')
-        if http_date:
-            ts = http_date_timestamp(http_date)
-            if ts:
+        try:
+            if timestamp_is_valid(ts):
                 return ts
+        except InvalidTsYear:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return date_ts[:4] + ts[4:]
+        except InvalidTsMonth:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return ts[:4] + date_ts[4:6] + ts[6:]
+        except InvalidTsDay:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return ts[:6] + date_ts[6:8] + ts[8:]
         return None
 
     response_pattern = re.compile('application/http;\s*msgtype=response$', re.I)

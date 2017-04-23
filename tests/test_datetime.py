@@ -3,19 +3,27 @@
 import pytest
 import py
 import sys
-from cdx_writer import timestamp_is_valid, http_date_timestamp
+from cdx_writer import (timestamp_is_valid, http_date_timestamp, InvalidTsYear,
+                        InvalidTsMonth, InvalidTsDay)
 
 
-@pytest.mark.parametrize("ts,result", [
-    ("20121506143600", False),
-    ("20121206143600", True),
-    ("20010161126200", False),
-    ("00001012262000", False),
-    ("30001012262000", False),
-    ("20011012262000", True),
+@pytest.mark.parametrize("ts,exc", [
+    ("20121506143600", InvalidTsMonth),
+    ("20010161126200", InvalidTsDay),
+    ("00001012262000", InvalidTsYear),
+    ("30001012262000", InvalidTsYear),
     ])
-def test_timestamp_is_valid(ts, result):
-    assert timestamp_is_valid(ts) == result
+def test_timestamp_is_valid_exception(ts, exc):
+    with pytest.raises(exc):
+        timestamp_is_valid(ts)
+
+
+@pytest.mark.parametrize("ts", [
+    "20011012262000",
+    "20121206143600"
+    ])
+def test_timestamp_is_valid(ts):
+    assert timestamp_is_valid(ts) is True
 
 
 @pytest.mark.parametrize("http_date,ts", [
@@ -32,7 +40,7 @@ def test_http_date_timestamp(http_date, ts):
 def test_invalid_warc_date(tmpdir):
     """invalid_range_digit_date.arc.gz has invalid WARC timestamp 20001812054100
     and HTTP Date: Wed, 23 Aug 2000 05:42:20 GMT. Output timestamp should be:
-    20000823054220
+    20000812054100 (month replaced by HTTP Date month).
     """
     testdir = py.path.local(__file__).dirpath()
     datadir = testdir / "small_warcs"
@@ -51,4 +59,4 @@ def test_invalid_warc_date(tmpdir):
             output = outpath.read_binary()
             sys.stdout = saved_stdout
     ts = output.splitlines()[2].split(" ")[1]
-    assert ts == "20000823054220"
+    assert ts == "20000812054100"
