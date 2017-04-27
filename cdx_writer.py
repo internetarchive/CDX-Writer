@@ -646,7 +646,7 @@ class RecordDispatcher(object):
             # If content after the HTTP headers starts with that, it should
             # be excluded
             if record.content and record.content[1] and \
-                    '\r\n\r\nDELETED_TIME=' in record.content[1]:
+                    record.content[1][:13] == 'DELETED_TIME=':
                 return None
             return ResponseHandler
         elif record.type == 'revisit':

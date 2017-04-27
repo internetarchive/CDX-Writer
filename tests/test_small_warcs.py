@@ -89,7 +89,8 @@ warcs_defaults = {
     'uncompressed.warc': b' CDX N b a m s k r M S V g\n',
     'wget_ia.warc.gz': b' CDX N b a m s k r M S V g\norg,archive)/ 20140314173216 https://archive.org/ text/html 200 ZSSZNM66RWQWZ7FMNEP2XEAORAULQHMY - - 6891 414 wget_ia.warc.gz\n',
     'tweet.warc.gz': b' CDX N b a m s k r M S V g\ncom,twitter)/zionfather/status/849230566553788416 20170404120905 https://twitter.com/zionfather/status/849230566553788416 application/json - BE7OMHMDUH6CI5OJXBC4D5AOFFZETVN2 - - 1168 0 tweet.warc.gz\n',
-    'deleted_html.warc.gz': b' CDX N b a m s k r M S V g\n'
+    'wwm-159-sample.gz': b' CDX N b a m s k r M S V g\n',
+    'wwm-159-false-check-sample.gz': b' CDX N b a m s k r M S V g\ncom,go,disney)/globalmedia/chrome/gonetwork_ffffff.gif 19990508062819 http://disney.go.com:80/globalmedia/chrome/gonetwork_FFFFFF.gif im - C6XMMZJC6ZVW6U7PWQ4QDZT4UY3ZQVAA - - 201 0 wwm-159-false-check-sample.gz\n'
 }
 
 testdir = py.path.local(__file__).dirpath()
