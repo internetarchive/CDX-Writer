@@ -6,7 +6,7 @@ import sys
 
 
 testdir = py.path.local(__file__).dirpath()
-datadir = testdir / "small_warcs"
+datadir = testdir / "check_datetime_warcs"
 sys.path[0:0] = (str(testdir / '..'),)
 cdx_writer = __import__('cdx_writer')
 
@@ -40,13 +40,28 @@ def test_timestamp_is_valid(ts):
 def test_http_date_timestamp(http_date, ts):
     assert cdx_writer.http_date_timestamp(http_date) == ts
 
-
-def test_invalid_warc_date(tmpdir):
-    """invalid_range_digit_date.arc.gz has invalid WARC timestamp 20001812054100
-    and HTTP Date: Wed, 23 Aug 2000 05:42:20 GMT. Output timestamp should be:
-    20000812054100 (month replaced by HTTP Date month).
+@pytest.mark.parametrize(["warc", "ts", "repair_ts"], [
+    # month invalid (18) so corrected from HTTP Date
+    ("invalid_range_digit_date.arc.gz", "20001812054100", None),
+    ("invalid_range_digit_date.arc.gz", "20000812054100", "--repair-ts"),
+    # WARC date correct so --repair-ts returns exactly the same result
+    ("uncompressed_correct_warc_date.warc", "20110307082935", None),
+    ("uncompressed_correct_warc_date.warc", "20110307082935", "--repair-ts"),
+    # invalid WARC date & HTTP date (`Date: Wed, 23 \x Aug 2000 05:42:20 GMT`)
+    # so we return "-" in both cases
+    ("rec_corrupt.warc.gz", "-", None),
+    ("rec_corrupt.warc.gz", "-", "--repair-ts"),
+    # invalid WARC day, corrected via HTTP Date
+    ("rec2_date_format.warc.gz", "20080462204825", None),
+    ("rec2_date_format.warc.gz", "20080402204825", "--repair-ts")
+    ])
+def test_invalid_warc_date(warc, ts, repair_ts, tmpdir):
+    """--repair-ts uses HTTP Date month if available to generate timestamp.
     """
-    args = ["--all-records", "invalid_range_digit_date.arc.gz"]
+    if repair_ts:
+        args = ["--all-records", repair_ts, warc]
+    else:
+        args = ["--all-records", warc]
     with datadir.as_cwd():
         outpath = tmpdir / 'stdout'
         saved_stdout = sys.stdout
@@ -57,5 +72,4 @@ def test_invalid_warc_date(tmpdir):
             sys.stdout.close()
             output = outpath.read_binary()
             sys.stdout = saved_stdout
-    ts = output.splitlines()[2].split(" ")[1]
-    assert ts == "20000812054100"
+    assert ts == output.splitlines()[-1].split(" ")[1]
