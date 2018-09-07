@@ -150,18 +150,23 @@ class RecordHandler(object):
             if 14 == date_len:
                 #arc record already has date in the format we need
                 return record.date
-            elif 16 == date_len:
+            elif 14 < date_len and date_len <= 18:
+                #some arc records have 15-digit dates: 201512000000000
                 #some arc records have 16-digit dates: 2000082305410049
-                return record.date[:14]
-            elif 18 == date_len:
                 #some arc records have 18-digit dates: 200009180023002953
                 return record.date[:14]
             elif 12 == date_len:
                 #some arc records have 12-digit dates: 200011201434
                 return record.date + '00'
+            elif 10 == date_len:
+                #some arc records have 10-digit dates: 2016020900
+                return record.date + '0000'
         elif re.match('[a-f0-9]+$', record.date):
             #some arc records have a hex string in the date field
             return None
+        elif re.match('[0-9]{14,18}[a-zA-Z]+$', record.date):
+            #some arc records are like this: 20160211000000jpg
+            return record.date[:14]
 
         #warc record
         date = datetime.strptime(record.date, "%Y-%m-%dT%H:%M:%SZ")
