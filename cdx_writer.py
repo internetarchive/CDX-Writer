@@ -23,6 +23,7 @@ import hashlib
 import json
 import urlparse
 from datetime import datetime
+from dateutil import parser
 from operator import attrgetter
 from optparse import OptionParser
 
@@ -108,6 +109,46 @@ def urljoin_and_normalize(base, url, charset):
     return norm_url.replace(' ', '%20')
 
 
+CURRENT_YEAR = datetime.utcnow().year
+
+class InvalidTsYear(Exception):
+    pass
+
+class InvalidTsMonth(Exception):
+    pass
+
+class InvalidTsDay(Exception):
+    pass
+
+def timestamp_is_valid(ts):
+    """Input is IA timestamp formatted like this: YYYYMMDDHHMMSS
+    Return False if day, mon or year outside range or invalid. Else True.
+    """
+    if ts and ts.isdigit():
+        if len(ts) != 14:
+            return False
+        year = int(ts[0:4])
+        if year < 1991 or year > CURRENT_YEAR:
+            raise InvalidTsYear
+        month = int(ts[4:6])
+        if month < 1 or month > 12:
+            raise InvalidTsMonth
+        day = int(ts[6:8])
+        if day < 1 or day > 31:
+            raise InvalidTsDay
+        return True
+    return False
+
+def http_date_timestamp(http_date):
+    """Input is HTTP Date formatted like this: Fri, 16 Aug 2013 10:51:08 GMT
+    but format may vary. Output is IA timestamp formatted like: YYYYMMDDHHMMSS
+    """
+    try:
+        dt = parser.parse(http_date)
+        return dt.strftime("%Y%m%d%H%M%S")
+    except:
+        return None
+
 class ParseError(Exception):
     pass
 
@@ -169,8 +210,11 @@ class RecordHandler(object):
             return record.date[:14]
 
         #warc record
-        date = datetime.strptime(record.date, "%Y-%m-%dT%H:%M:%SZ")
-        return date.strftime("%Y%m%d%H%M%S")
+        try:
+            date = datetime.strptime(record.date, "%Y-%m-%dT%H:%M:%SZ")
+            return date.strftime("%Y%m%d%H%M%S")
+        except ValueError:
+            return None
 
     def safe_url(self):
         url = self.record.url
@@ -354,8 +398,42 @@ class ResponseHandler(HttpHandler):
     def __init__(self, record, offset, cdx_writer):
         super(ResponseHandler, self).__init__(record, offset, cdx_writer)
         self.lxml_parse_limit = cdx_writer.lxml_parse_limit
+        self.repair_ts = cdx_writer.repair_ts
         self.headers, self.content = self.parse_headers_and_content()
         self.meta_tags = self.parse_meta_tags()
+
+    @property
+    def date(self):
+        """date / field "b".
+        If repair_ts `CDX_Writer` parameter is True (default is False) check
+        if WARC timestamp is invalid regarding year, month or day, the relevant
+        exception is raised by `timestamp_is_valid`. Try to extract datetime
+        from Date HTTP header and modify WARC timestamp accordingly.
+        If the WARC timestamp problem is different, just return None.
+        """
+        if not self.repair_ts:
+            return super(ResponseHandler, self).date
+
+        ts = super(ResponseHandler, self).date
+        try:
+            if timestamp_is_valid(ts):
+                return ts
+        except InvalidTsYear:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return date_ts[:4] + ts[4:]
+        except InvalidTsMonth:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return ts[:4] + date_ts[4:6] + ts[6:]
+        except InvalidTsDay:
+            http_date = self.parse_http_header('date')
+            if http_date:
+                date_ts = http_date_timestamp(http_date)
+                return ts[:6] + date_ts[6:8] + ts[8:]
+        return None
 
     response_pattern = re.compile('application/http;\s*msgtype=response$', re.I)
 
@@ -682,7 +760,7 @@ class RecordDispatcher(object):
         return None
 
 class CDX_Writer(object):
-    def __init__(self, file, out_file=sys.stdout, format="N b a m s k r M S V g", use_full_path=False, file_prefix=None, all_records=False, screenshot_mode=False, exclude_list=None, stats_file=None, canonicalizer_options=None):
+    def __init__(self, file, out_file=sys.stdout, format="N b a m s k r M S V g", use_full_path=False, file_prefix=None, all_records=False, screenshot_mode=False, exclude_list=None, stats_file=None, repair_ts=False, canonicalizer_options=None):
         """This class is instantiated for each web archive file and generates
         CDX from it.
 
@@ -696,6 +774,8 @@ class CDX_Writer(object):
         :param screenshot_mode: ``True`` turns on IA-proprietary screenshot mode
         :param exclude_list: a file containing a list of excluded URLs
         :param stat_file: a filename to write out statistics.
+        :param repair_ts: if ``True`` check if WARC timestamp is valid and if not
+            try to repair it using HTTP Header Date value if any.
         :param canonicalizer_options: URL canonicalizer options
         """
         self.field_map = {'M': 'AIF meta tags',
@@ -714,7 +794,7 @@ class CDX_Writer(object):
         self.file   = file
         self.out_file = out_file
         self.format = format
-
+        self.repair_ts = repair_ts
         self.fieldgetter = self._build_fieldgetter(self.format.split())
 
         self.dispatcher = RecordDispatcher(
@@ -870,6 +950,8 @@ def main(args):
     parser.add_option("--no-host-massage", dest="canonicalizer_options",
                       action='append_const', const=('host_massage', False),
                       help='Turn off host_massage (ex. stripping "www.")')
+    parser.add_option("--repair-ts", dest="repair_ts", action="store_true",
+                      help="Repair invalid WARC timestamps using HTTP Header Date value.")
 
     options, input_files = parser.parse_args(args=args)
 
@@ -888,6 +970,7 @@ def main(args):
                             screenshot_mode = options.screenshot_mode,
                             exclude_list    = options.exclude_list,
                             stats_file      = options.stats_file,
+                            repair_ts       = options.repair_ts,
                             canonicalizer_options =
                             options.canonicalizer_options
                            )

@@ -1,0 +1,43 @@
+WARC/1.0
+WARC-Type: warcinfo
+WARC-Date: 2011-03-07T08:29:36Z
+WARC-Filename: NLA-AU-CRAWL-005-20110307082936-01731-crawling119.us.archive.org.warc.gz
+WARC-Record-ID: <urn:uuid:eb2ed96e-7d2d-4e26-a9ff-6f5022c33713>
+Content-Type: application/warc-fields
+Content-Length: 639
+
+software: Heritrix/1.15.5-201101182339 http://crawler.archive.org
+ip: 207.241.235.37
+hostname: crawling119.us.archive.org
+format: WARC File Format 1.0
+conformsTo: http://bibnum.bnf.fr/WARC/WARC_ISO_28500_version1_latestdraft.pdf
+operator: Dominic Dela Cruz
+publisher: Internet Archive
+audience: National Library of Australia
+isPartOf: NLA-AU-CRAWL-005-02-14-2011
+description: National Library of Australia .au country crawl
+robots: classic
+http-header-user-agent: Mozilla/5.0 (compatible; archive.org_bot/heritrix-1.15.5-x +http://pandora.nla.gov.au/crawl.html)
+http-header-from: archive-crawler-agent@lists.sourceforge.net
+
+
+
+WARC/1.0
+WARC-Type: request
+WARC-Target-URI: http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&returnurl=http%3a%2f%2falumni.icms.edu.au%2fs%2f1278%2findex.aspx%3fsid%3d1278%26gid%3d1%26returnurl%3dhttp%3a%2f%2falumni.icms.edu.au%2fs%2f1278%2findex.aspx%3fsid%3d1278%26gid%3d1%26verbiagebuilder%3d1%26pgid%3d94%26cid%3d256%26mid%3d3054%26pgid%3d3%26cid%3d421&pgid=8&cid=46
+WARC-Date: 2011-03-07T08:29:35Z
+WARC-Concurrent-To: <urn:uuid:b36eb361-7c58-4222-a4a9-91c1bfe36518>
+WARC-Record-ID: <urn:uuid:83395e2e-468f-463e-b1c8-c39d4ba139bc>
+Content-Type: application/http; msgtype=request
+Content-Length: 1266
+
+GET /s/1278/index.aspx?sid=1278&gid=1&returnurl=http%3a%2f%2falumni.icms.edu.au%2fs%2f1278%2findex.aspx%3fsid%3d1278%26gid%3d1%26returnurl%3dhttp%3a%2f%2falumni.icms.edu.au%2fs%2f1278%2findex.aspx%3fsid%3d1278%26gid%3d1%26verbiagebuilder%3d1%26pgid%3d94%26cid%3d256%26mid%3d3054%26pgid%3d3%26cid%3d421&pgid=8&cid=46 HTTP/1.0
+User-Agent: Mozilla/5.0 (compatible; archive.org_bot/heritrix-1.15.5-x +http://pandora.nla.gov.au/crawl.html)
+From: archive-crawler-agent@lists.sourceforge.net
+Connection: close
+Referer: http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&pgid=3&cid=40&returnurl=http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&returnurl=http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&verbiagebuilder=1&pgid=94&cid=256&mid=3054&pgid=3&cid=421
+Host: alumni.icms.edu.au
+Cookie: AL_LastUpdated=7/03/2011 2:28:44 AM; DBMS_RETURNURL_526=/s/1278/index.aspx?sid=1278&gid=1&verbiagebuilder=1&pgid=354&cid=935; DBMS_RETURNURL_935=http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&pgid=353&cid=934&ecid=934&crid=0&calpgid=61&calcid=882; DBMS_RETURNURL_971=http://alumni.icms.edu.au/s/1278/index.aspx?sid=1278&gid=1&pgid=379&crid=0&calpgid=61&calcid=877; e98683de9c4ce6e183214b3730302703=1500813e95d54c6765168ca81567111d
+
+
+
