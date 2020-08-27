@@ -105,7 +105,7 @@ datadir = testdir / "small_warcs"
 sys.path[0:0] = (str(testdir / '..'),)
 cdx_writer = __import__('cdx_writer')
 
-@pytest.mark.parametrize(["file", "expected"], warcs_all_records.iteritems())
+@pytest.mark.parametrize(["file", "expected"], warcs_all_records.items())
 def test_all_records(file, expected, tmpdir):
     '''Test `cdx_writer.py --all-records WARC`.'''
     assert datadir.join(file).exists()
@@ -124,7 +124,7 @@ def test_all_records(file, expected, tmpdir):
     assert 0 == status
     assert output == expected
 
-@pytest.mark.parametrize(["file", "expected"], warcs_defaults.iteritems())
+@pytest.mark.parametrize(["file", "expected"], warcs_defaults.items())
 def test_defaults(file, expected, tmpdir):
     '''Test `cdx_writer.py WARC`.'''
     assert datadir.join(file).exists()
