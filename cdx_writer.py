@@ -26,6 +26,11 @@ from datetime import datetime
 from operator import attrgetter
 from optparse import OptionParser
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 def to_unicode(s, charset):
     if isinstance(s, str):
         if charset is None:
