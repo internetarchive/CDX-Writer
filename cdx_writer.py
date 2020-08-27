@@ -21,10 +21,20 @@ import base64
 import chardet
 import hashlib
 import json
-import urlparse
+
 from datetime import datetime
 from operator import attrgetter
 from optparse import OptionParser
+
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 def to_unicode(s, charset):
     if isinstance(s, str):
@@ -40,7 +50,7 @@ def to_unicode(s, charset):
 
 # these function used to be used for normalizing URL for ``redirect`` field.
 def urljoin_and_normalize(base, url, charset):
-    """urlparse.urljoin removes blank fragments (trailing #),
+    """urljoin removes blank fragments (trailing #),
     even if allow_fragments is set to True, so do this manually.
 
     Also, normalize /../ and /./ in url paths.
@@ -78,7 +88,7 @@ def urljoin_and_normalize(base, url, charset):
     base = to_unicode(base, 'utf-8')
 
     try:
-        joined_url = urlparse.urljoin(base, url)
+        joined_url = urljoin(base, url)
     except ValueError:
         #some urls we find in arc files no longer parse with python 2.7,
         #e.g. 'http://\x93\xe0\x90E\x83f\x81[\x83^\x93\xfc\x97\xcd.com/'
@@ -723,7 +733,7 @@ class CDX_Writer(object):
 
         self.file   = file
         self.out_file = out_file
-        self.format = format
+        self.format = format.encode('utf-8')
 
         self.fieldgetter = self._build_fieldgetter(self.format.split())
 

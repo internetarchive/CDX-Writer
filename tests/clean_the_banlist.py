@@ -34,6 +34,7 @@ Here is the incomplete list of regexes for stripping prefixes, which is no longe
                 r'^http://web.archive.bibalex.orgyweb/\d{14}/',
                 ]
 """
+from __future__ import print_function
 
 import sys
 import re
@@ -88,7 +89,7 @@ def remove_prefix(s):
 
     result = urlparse.urlparse(s)
     if not (('archive.org' in result.netloc) or ('bibalex.org' in result.netloc) or ('waybackmachine.org' in result.netloc)):
-        print 'unable to parse url:', s, orig_s
+        print('unable to parse url:', s, orig_s)
         sys.exit(-1)
 
     start_pos = result.path.find('http://')
@@ -109,7 +110,7 @@ def remove_prefix(s):
         if match:
             s = match.group(1)
         else:
-            print 'unable to find match for url:', s
+            print('unable to find match for url:', s)
             sys.exit(-1)
     else:
         s = result.path[start_pos:]
@@ -148,15 +149,15 @@ urls.sort()
 
 for url in urls:
     if ('archive.org' in url) or ('bibalex.org' in url) or ('waybackmachine.org' in url):
-        print 'unfiltered url:', url
+        print('unfiltered url:', url)
         sys.exit(-1)
 
     if comment:
         url += ' #'+comment
 
     try:
-        print url.encode('ascii')
+        print(url.encode('ascii'))
     except:
-        print 'UnicodeError', 'BAD URL: '+repr(url)
-        print 'terminating'
+        print('UnicodeError', 'BAD URL: '+repr(url))
+        print('terminating')
         sys.exit(-1)

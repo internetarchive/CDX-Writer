@@ -1,8 +1,14 @@
+os: linux
+dist: focal
 language: python
 python:
   - "2.7"
+  - "3.8"
+jobs:
+  allow_failures:
+    - python: "3.8"
 install:
-  - pip install -r requirements.txt .
-  - pip install pytest
+  - pip install flake8 pytest -r requirements.txt .
 script:
-  - py.test
+  - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+  - pytest
