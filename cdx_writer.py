@@ -92,8 +92,8 @@ def urljoin_and_normalize(base, url, charset):
         path   = joined_url[m.end(1):]
         if path.startswith('../'):
             path = path[3:]
-        norm_url = domain + re.sub('/[^/]+/\.\./', '/', path)
-        norm_url = re.sub('/\./', '/', norm_url)
+        norm_url = domain + re.sub(r'/[^/]+/\.\./', '/', path)
+        norm_url = re.sub(r'/\./', '/', norm_url)
     else:
         norm_url = joined_url
 
@@ -351,13 +351,13 @@ class ResponseHandler(HttpHandler):
         self.headers, self.content = self.parse_headers_and_content()
         self.meta_tags = self.parse_meta_tags()
 
-    response_pattern = re.compile('application/http;\s*msgtype=response$', re.I)
+    response_pattern = re.compile(r'application/http;\s*msgtype=response$', re.I)
 
     def parse_http_header(self, header_name):
         if self.headers is None:
             return None
 
-        pattern = re.compile(header_name+':\s*(.+)', re.I)
+        pattern = re.compile(header_name+r':\s*(.+)', re.I)
         for line in iter(self.headers):
             m = pattern.match(line)
             if m:
@@ -378,12 +378,12 @@ class ResponseHandler(HttpHandler):
         if m:
             content_type = m.group(1)
 
-        if re.match('[a-z0-9\-\.\+/]+$', content_type):
+        if re.match(r'[a-z0-9\-\.\+/]+$', content_type):
             return content_type
         else:
             return 'unk'
 
-    charset_pattern = re.compile('charset\s*=\s*([a-z0-9_\-]+)', re.I)
+    charset_pattern = re.compile(r'charset\s*=\s*([a-z0-9_\-]+)', re.I)
 
     crlf_pattern = re.compile('\r?\n\r?\n')
 
