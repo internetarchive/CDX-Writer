@@ -702,13 +702,13 @@ class RecordDispatcher(object):
         return None
 
 class CDX_Writer(object):
-    def __init__(self, file, out_file=sys.stdout, format="N b a m s k r M S V g", use_full_path=False, file_prefix=None, all_records=False, screenshot_mode=False, exclude_list=None, stats_file=None, canonicalizer_options=None):
+    def __init__(self, file, out_file=sys.stdout, format=b"N b a m s k r M S V g", use_full_path=False, file_prefix=None, all_records=False, screenshot_mode=False, exclude_list=None, stats_file=None, canonicalizer_options=None):
         """This class is instantiated for each web archive file and generates
         CDX from it.
 
         :param file: input web archive file name
         :param out_file: file object to write CDX to
-        :param format: CDX field specification string.
+        :param format: CDX field specification bytes.
         :param use_full_path: if ``True``, use absolute path of `file` for ``g``
         :param file_prefix: prefix for `file` (effective only when `use_full_path`
             is ``False``)
