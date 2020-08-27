@@ -2,6 +2,7 @@
 """
 Test cdx_writer.py with real-world W/ARCs.
 """
+from __future__ import print_function
 import pytest
 import py
 import sys
@@ -65,12 +66,12 @@ def test_large_warcs(data, tmpdir):
 
     cmd = TIMECMD + '%s %s >%s' % (
         cdx_writer, warc_fn, tmpcdx)
-    print "  running", cmd
+    print("  running", cmd)
     with py.path.local(warc_dir).as_cwd():
         status, output = commands.getstatusoutput(cmd)
     assert 0 == status
-    print 'time: ', output
-    print 'size: ', os.path.getsize(warc_file)
+    print('time: ', output)
+    print('size: ', os.path.getsize(warc_file))
 
     # translate CDX output into expected data format
     tmphashcdx = tmpdir / 'tmp.hashcdx'
@@ -80,9 +81,9 @@ def test_large_warcs(data, tmpdir):
     exp = os.path.join(data_dir, re.sub(r'\.w?arc\.gz$', '.exp', warc_fn))
     if os.path.exists(exp):
         cmd = 'diff -u %r %r' % (exp, str(tmphashcdx))
-        print "  running", cmd
+        print("  running", cmd)
         status, output = commands.getstatusoutput(cmd)
-        print output
+        print(output)
         assert 0 == status
 
     if expected_cdx_md5:
@@ -123,8 +124,8 @@ if __name__ == "__main__":
             outdir = os.path.dirname(out_file)
             if not os.path.isdir(outdir):
                 os.makedirs(outdir)
-            print >>sys.stderr, "- Reading {}".format(warc_file)
-            print >>sys.stderr, "  Writing {}".format(out_file)
+            print("- Reading {}".format(warc_file), file=sys.stderr)
+            print("  Writing {}".format(out_file), file=sys.stderr)
             with open(out_file, 'wb') as outf:
                 p = run_cdx_writer(warc_file, outf, args.warcdir)
                 rc = p.wait()
@@ -136,8 +137,8 @@ if __name__ == "__main__":
                                    re.sub(r'.w?arc\.gz$', '.cdx', w['fn']))
             out_file = os.path.join(args.datadir,
                                     re.sub(r'.w?arc\.gz$', '.exp', w['fn']))
-            print >>sys.stderr, "- Reading {}".format(in_file)
-            print >>sys.stderr, "  Writing {}".format(out_file)
+            print("- Reading {}".format(in_file), file=sys.stderr)
+            print("  Writing {}".format(out_file), file=sys.stderr)
             hashcdx(in_file, out_file)
 
     def download_warcs(args):
@@ -150,7 +151,7 @@ if __name__ == "__main__":
             cmd = ("curl -b %s -L -o %s -w '%%{http_code}'"
                    " https://archive.org/download/%s" % (
                     args.cookie, warc_file, w['fn']))
-            print >>sys.stderr, "Running %s" % (cmd,)
+            print("Running %s" % (cmd,), file=sys.stderr)
             status, output = commands.getstatusoutput(cmd)
             assert status == 0, "Download failed with status=%d" % (status,)
 
@@ -168,7 +169,7 @@ if __name__ == "__main__":
                 )
             sys.stderr.write("OK\n")
             fcount += 1
-        print >>sys.stderr, "Downloaded %d files in %s" % (fcount, args.warcdir)
+        print("Downloaded %d files in %s" % (fcount, args.warcdir), file=sys.stderr)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-w", "--warcdir", default=warc_dir)
