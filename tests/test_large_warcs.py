@@ -8,7 +8,6 @@ import py
 import sys
 import os
 import re
-import commands
 import subprocess
 from pipes import quote
 from hashlib import md5
@@ -68,7 +67,7 @@ def test_large_warcs(data, tmpdir):
         cdx_writer, warc_fn, tmpcdx)
     print("  running", cmd)
     with py.path.local(warc_dir).as_cwd():
-        status, output = commands.getstatusoutput(cmd)
+        status, output = subprocess.getstatusoutput(cmd)
     assert 0 == status
     print('time: ', output)
     print('size: ', os.path.getsize(warc_file))
@@ -82,7 +81,7 @@ def test_large_warcs(data, tmpdir):
     if os.path.exists(exp):
         cmd = 'diff -u %r %r' % (exp, str(tmphashcdx))
         print("  running", cmd)
-        status, output = commands.getstatusoutput(cmd)
+        status, output = subprocess.getstatusoutput(cmd)
         print(output)
         assert 0 == status
 
@@ -152,7 +151,7 @@ if __name__ == "__main__":
                    " https://archive.org/download/%s" % (
                     args.cookie, warc_file, w['fn']))
             print("Running %s" % (cmd,), file=sys.stderr)
-            status, output = commands.getstatusoutput(cmd)
+            status, output = subprocess.getstatusoutput(cmd)
             assert status == 0, "Download failed with status=%d" % (status,)
 
             sys.stderr.write("Checking checksum...")
