@@ -4,6 +4,9 @@ language: python
 python:
   - "2.7"
   - "3.8"
+jobs:
+  allow_failures:
+    - python: "3.8"
 install:
   - pip install flake8 pytest -r requirements.txt .
 script:
