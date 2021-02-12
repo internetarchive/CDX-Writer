@@ -370,7 +370,7 @@ class ResponseHandler(HttpHandler):
             return 'unk'
 
         # some http responses end abruptly: ...Content-Length: 0\r\nConnection: close\r\nContent-Type: \r\n\r\n\r\n\r\n'
-        content_type = content_type.strip()
+        content_type = content_type.strip().replace('\'', '').replace('"', '')
         if '' == content_type:
             return 'unk'
 
@@ -558,7 +558,7 @@ class ResourceHandler(RecordHandler):
     """
     @property
     def mime_type(self):
-        return self.record.content[0]
+        return self.record.content[0].replace('\'', '').replace('"', '')
 
 class RevisitHandler(HttpHandler):
     """HTTP revisit record (``revisit`` record type).
