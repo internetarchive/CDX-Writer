@@ -864,3 +864,16 @@ class FtpHandler(RecordHandler):
             return digest.replace('sha1:', '')
 
         return self.content.content_digest()
+
+class VideoMetaHandler(RecordHandler):
+    @property
+    def original_url(self):
+        return 'http://wayback-metadata.archive.org/video-meta/' + self.safe_url()
+
+    @property
+    def massaged_url(self):
+        return 'org,archive,wayback-metadata)/video-meta/' + self.urlkey(self.safe_url())
+
+    @property
+    def mime_type(self):
+        return self._normalize_content_type('application/json;generator-youtube-dl')

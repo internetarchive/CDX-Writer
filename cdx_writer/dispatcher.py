@@ -1,5 +1,5 @@
 from .handler import (RecordHandler, ResponseHandler, RevisitHandler,
-                      ResourceHandler, FtpHandler, WarcinfoHandler)
+                      ResourceHandler, FtpHandler, WarcinfoHandler, VideoMetaHandler)
 
 __all__ = [
     'RecordDispatcher', 'DefaultDispatcher', 'AllDispatcher'
@@ -70,6 +70,13 @@ class DefaultDispatcher(RecordDispatcher):
             return FtpHandler
         elif record.url.startswith(('http://', 'https://')):
             return ResourceHandler
+        return None
+    
+    def dispatch_metadata(self, record, env):
+        content_type = record.content_type
+
+        if content_type and content_type.startswith('application/json;generator-youtube-dl'):
+            return VideoMetaHandler
         return None
 
 class AllDispatcher(DefaultDispatcher):

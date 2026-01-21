@@ -12,6 +12,7 @@ from surt import surt
 
 from .dispatcher import DefaultDispatcher, AllDispatcher
 from .screenshot import ScreenshotDispatcher
+from .video      import VideoDispatcher
 from .exclusion import PrefixExclusion
 from .handler import RecordHandler
 from .archive import ArchiveRecordReader
@@ -21,7 +22,7 @@ class CDX_Writer(object):
         'default': DefaultDispatcher(),
         'all': AllDispatcher(),
 
-        'screenshot': ScreenshotDispatcher()
+        'screenshot': ScreenshotDispatcher(),
     }
 
     def __init__(self, in_file, out_file=sys.stdout, format="N b a m s k r M S V g",
